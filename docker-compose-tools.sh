@@ -9,8 +9,7 @@ if [ ! -e $CONFIG ]; then
 fi
 
 source $CONFIG
-# tirar os ../
-source $DC_DIR/functions.sh
+source $DCT_DIR/functions.sh
 cd $DC_DIR
 
 args=$@
