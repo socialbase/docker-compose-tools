@@ -1,0 +1,7 @@
+version: '2'
+
+services:
+    web:
+        image: "nginx:${WEB_TAG}"
+        environment:
+            env: "PROD"
