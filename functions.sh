@@ -4,6 +4,9 @@ get_param () {
     service=$1
     key=$2
     ret=$(cat ${service}/service.json |jq ".${key}"| sed -e 's/"//g')
+    if [ "$ret" == "null" ] || [ -z $ret ]; then
+        return 1;
+    fi
     echo $ret
 }
 
@@ -20,6 +23,9 @@ clone () {
 
 clone_service () {
     git=$(get_param $1 "git")
+    if [ $? ]; then
+        return 1
+    fi
     dir=${SRC_DIR}$(get_param $1 "dir")
     if [ ! -d "${dir}" ]; then
         git clone $git ${dir}

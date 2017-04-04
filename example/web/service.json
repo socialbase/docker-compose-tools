@@ -1,5 +1,4 @@
 {
-    "git": "git@github.com:socialbase/docker-compose-tools.git",
     "dir": "web",
     "prod": "prod.yml",
     "dev": "dev.yml"
