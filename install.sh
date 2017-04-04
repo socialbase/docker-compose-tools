@@ -34,4 +34,8 @@ for i in $(list_services); do
 done
 
 sudo ln -fs ${dir}/docker-compose-tools.sh /usr/local/bin/$executable
+if [ $? ]; then
+    echo "Install failed"
+    exit 1;
+fi
 echo "${executable} installed"
