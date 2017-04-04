@@ -39,7 +39,7 @@ case "$1" in
             for i in $dev_services; do
                 clone_service $i
                 yml=$(get_param $i "dev")
-                if [ "$yml" == "null" ]; then
+                if [ $? ] || [ !-f $yml ]; then
                     echo "Key 'dev' not found in $i/service.json, using prod"
                     yml=$(get_param $i "prod")
                 fi
