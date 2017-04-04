@@ -40,8 +40,8 @@ case "$1" in
                 clone_service $i
                 yml=$(get_param $i "dev")
                 if [ "$yml" == "null" ]; then
-                    echo "Key 'dev' not found in $i/service.json"
-                    exit 1
+                    echo "Key 'dev' not found in $i/service.json, using prod"
+                    yml=$(get_param $i "prod")
                 fi
                 dev_files="${dev_files} -f ${i}/${yml}"
             done;
