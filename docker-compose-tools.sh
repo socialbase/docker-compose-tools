@@ -58,7 +58,9 @@ case "$1" in
         prod_files=$(get_prod_files)
         env=""
         for i in $homologs; do
-            env="${ENV}$(echo $i |sed -e "s/\(\w\)=\(.*\)/\1_TAG=\2/") "
+            service=$(echo $i |cut -d'=' -f1);
+            tag=$(echo $i |cut -d'=' -f2);
+            env="${env}${service^^}_TAG=${tag} "
         done;
         eval "${env}docker-compose -f docker-compose.yml ${prod_files} config"
         ;;
