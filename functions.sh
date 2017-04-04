@@ -33,7 +33,7 @@ clone_service () {
 }
 
 list_services () {
-    ls -d */ |grep -v .git |cut -f1 -d'/'
+    ls -d */ |grep -v .git |grep -v docker-compose-tools |cut -f1 -d'/'
 }
 
 get_prod_files () {
