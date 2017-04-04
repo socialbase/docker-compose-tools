@@ -29,3 +29,19 @@ clone_service () {
 list_services () {
     ls -d */ |grep -v .git |cut -f1 -d'/'
 }
+
+get_prod_files () {
+    list_prod=$1
+    if [ -z $list_prod ]; then
+        list_prod=$(list_services)
+    fi
+    for i in $list_prod; do
+        yml=$(get_param $i "prod")
+        if [ "$yml" == "null" ]; then
+            echo "Key 'prod' not found in $i/service.json"
+            exit 1
+        fi
+        prod_files="${prod_files} -f ${i}/${yml}"
+    done;
+    echo $prod_files
+}

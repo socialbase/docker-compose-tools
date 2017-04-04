@@ -16,17 +16,15 @@ args=$@
 
 help () {
     echo "usage: $0 command <options>"
-    echo -e "\tservices   \tList services"
-    echo -e "\trun   \t\tRun all services, if set a service, this is run in dev mode"
+    echo -e "\tservices \tList services"
+    echo -e "\trun      \tRun all services, if set a service, this is run in dev mode"
+    echo -e "\thomolog  \tRun specific tag of container. Ex: API=pr-2"
 }
 
 
 case "$1" in
     "services")
         list_services
-        ;;
-    "help")
-        help
         ;;
     "run")
         dev_services=${args/$1}
@@ -50,16 +48,24 @@ case "$1" in
         fi
 
         if [ ! -z "$prod" ]; then
-            for i in $prod; do
-                yml=$(get_param $i "prod")
-                if [ "$yml" == "null" ]; then
-                    echo "Key 'prod' not found in $i/service.json"
-                    exit 1
-                fi
-                prod_files="${prod_files} -f ${i}/${yml}"
-            done;
+            prod_files=$(get_prod_files $prod);
         fi
 
         eval "docker-compose -f docker-compose.yml ${prod_files} ${dev_files} config"
+        ;;
+    "homolog")
+        homologs=${args/$1}
+        prod_files=$(get_prod_files)
+        env=""
+        for i in $homologs; do
+            env="${ENV}$(echo $i |sed -e "s/\(\w\)=\(.*\)/\1_TAG=\2/") "
+        done;
+        eval "${env}docker-compose -f docker-compose.yml ${prod_files} config"
+        ;;
+    "help")
+        help
+        ;;
+    *)
+        help
         ;;
 esac
