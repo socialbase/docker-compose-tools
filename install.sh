@@ -26,7 +26,7 @@ if [ -f $dc_dir/.env ]; then
     rm $dc_dir/.env
 fi
 
-cd $src_dir
+cd $dc_dir
 for i in $(list_services); do
     tmp_dir=${src_dir}$(get_param $i "dir")
     echo "${i^^}_TAG=latest" >> $dc_dir/.env
