@@ -31,15 +31,22 @@ case "$1" in
         prod=$(list_services)
         dev_files=""
         prod_files=""
+        env=""
         if [ ! -z "$dev_services" ]; then
             filter=$(echo $dev_services | sed -e 's/ /$\\|/g')
             filter="$filter\$"
             prod=$(list_services | grep -v "$filter")
 
             for i in $dev_services; do
+                if [ ! -z $(echo $i |grep =) ]; then
+                    service=$(echo $i |cut -d'=' -f1);
+                    tag=$(echo $i |cut -d'=' -f2);
+                    env="${env}${service^^}_TAG=${tag} "
+                    continue;
+                fi;
                 clone_service $i
                 yml=$(get_param $i "dev")
-                if [ $? ] || [ !-f $yml ]; then
+                if [ $? -ne 0 ] || [ ! -f "${i}/${yml}" ]; then
                     echo "Key 'dev' not found in $i/service.json, using prod"
                     yml=$(get_param $i "prod")
                 fi
@@ -50,19 +57,7 @@ case "$1" in
         if [ ! -z "$prod" ]; then
             prod_files=$(get_prod_files $prod);
         fi
-
-        eval "docker-compose -f docker-compose.yml ${prod_files} ${dev_files} config"
-        ;;
-    "homolog")
-        homologs=${args/$1}
-        prod_files=$(get_prod_files)
-        env=""
-        for i in $homologs; do
-            service=$(echo $i |cut -d'=' -f1);
-            tag=$(echo $i |cut -d'=' -f2);
-            env="${env}${service^^}_TAG=${tag} "
-        done;
-        eval "${env}docker-compose -f docker-compose.yml ${prod_files} config"
+        eval "${env} docker-compose -f docker-compose.yml ${prod_files} ${dev_files} config"
         ;;
     "help")
         help
