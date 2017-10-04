@@ -33,7 +33,11 @@ clone_service () {
 }
 
 list_services () {
-    ls -d */ |grep -v .git |grep -v docker-compose-tools |cut -f1 -d'/'
+    for i in $(ls -d */ |cut -f1 -d'/'); do
+        if [ -f "${i}/service.json" ]; then
+            echo $i;
+        fi;
+    done;
 }
 
 get_prod_files () {
@@ -50,4 +54,64 @@ get_prod_files () {
         prod_files="${prod_files} -f ${i}/${yml}"
     done;
     echo $prod_files
+}
+
+gen_initial_files() {
+    dc_dir=$1
+    src_dir=$2
+
+    cd $dc_dir
+
+    if [ -f $dc_dir/.env ]; then
+        rm $dc_dir/.env
+    fi
+
+    echo "SRC_DIR=${src_dir}" > $dc_dir/.env
+
+    for i in $(list_services); do
+        tmp_dir=${src_dir}$(get_param $i "dir")
+        echo "${i^^}_TAG=latest" >> $dc_dir/.env
+        echo "${i^^}_DIR=${tmp_dir}" >> $dc_dir/.env
+    done
+}
+
+run_docker_composer_cmd() {
+    dev_services=$@
+    dev_services=${dev_services/$1}
+    prod=$(list_services)
+    dev_files=""
+    prod_files=""
+    env=""
+    up=""
+    if [ ! -z "$dev_services" ]; then
+        filter=$(echo $dev_services | sed -e 's/ /$\\|/g')
+        filter="$filter\$"
+        prod=$(list_services | grep -v "$filter")
+
+        for i in $dev_services; do
+            if [ ! -z $(echo $i |grep =) ]; then
+                service=$(echo $i |cut -d'=' -f1);
+                tag=$(echo $i |cut -d'=' -f2);
+
+                if [ "${service}" == "ser" ]; then
+                    up="${up} ${tag}"
+                else
+                    env="${env}${service^^}_TAG=${tag} "
+                fi
+                continue;
+            fi;
+            clone_service $i
+            yml=$(get_param $i "dev")
+            if [ $? -ne 0 ] || [ ! -f "${i}/${yml}" ]; then
+                echo "Key 'dev' not found in $i/service.json, using prod"
+                yml=$(get_param $i "prod")
+            fi
+            dev_files="${dev_files} -f ${i}/${yml}"
+        done;
+    fi
+
+    if [ ! -z "$prod" ]; then
+        prod_files=$(get_prod_files $prod);
+    fi
+    eval "${env}docker-compose -f docker-compose.yml ${prod_files} ${dev_files} $1 ${daemon} ${up}"
 }
