@@ -8,16 +8,20 @@ cd docker-compose-tools
 ./install.sh ~/src/docker ~/src
 ```
 
+## Commands
+
+- services
+- config
+- run
+- build
+- pull
+- stop
+
 ## Struct Example
-Files:
 ```
 docker-compose.yml
  - services
    - web
-     - service.json
-     - dev.yml
-     - prod.yml
-   - db
      - service.json
      - dev.yml
      - prod.yml
@@ -30,12 +34,14 @@ version: '2'
 
 services:
     web:
+        image: nginx
         ports:
             - 81:80
         networks:
             - net
 
     db:
+		image: mysql:latest
         ports:
             - 5432:5432
         networks:
@@ -67,7 +73,6 @@ version: '2'
 
 services:
     web:
-        image: nginx
         environment:
             env: "PROD"
 ```
@@ -77,7 +82,6 @@ version: '2'
 
 services:
     web:
-        image: nginx
         environment:
             env: "DEV"
 ```

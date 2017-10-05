@@ -90,15 +90,14 @@ run_docker_composer_cmd() {
         prod=$(list_services | grep -v "$filter")
 
         for i in $dev_services; do
-            if [ ! -z $(echo $i |grep =) ]; then
+            if [ ! -z $(echo $i |grep '^+') ]; then
+                up="${up} $(echo $i |sed -e 's/+//g')";
+                continue;
+            elif [ ! -z $(echo $i |grep =) ]; then
                 service=$(echo $i |cut -d'=' -f1);
                 tag=$(echo $i |cut -d'=' -f2);
 
-                if [ "${service}" == "ser" ]; then
-                    up="${up} ${tag}"
-                else
-                    env="${env}${service^^}_TAG=${tag} "
-                fi
+                env="${env}${service^^}=${tag} "
                 continue;
             fi;
             clone_service $i
@@ -106,7 +105,11 @@ run_docker_composer_cmd() {
             if [ $? -ne 0 ] || [ ! -f "${i}/${yml}" ]; then
                 echo "Key 'dev' not found in $i/service.json, using prod"
                 yml=$(get_param $i "prod")
-            fi
+                if [ $? -ne 0 ] || [ ! -f "${i}/${yml}" ]; then
+                echo "Key 'dev' not found in $i/service.json"
+                    continue;
+                fi;
+            fi;
             dev_files="${dev_files} -f ${i}/${yml}"
         done;
     fi
@@ -114,5 +117,5 @@ run_docker_composer_cmd() {
     if [ ! -z "$prod" ]; then
         prod_files=$(get_prod_files $prod);
     fi
-    eval "${env}docker-compose -f docker-compose.yml ${prod_files} ${dev_files} $1 ${daemon} ${up}"
+    echo "${env}docker-compose -f docker-compose.yml ${prod_files} ${dev_files} $1 ${daemon} ${up}"
 }

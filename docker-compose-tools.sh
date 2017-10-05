@@ -34,6 +34,12 @@ case "$1" in
     "services")
         list_services
         ;;
+    "gen-env")
+        gen_initial_files $DC_DIR $SRC_DIR
+        ;;
+    "config")
+        run_docker_composer_cmd "config" $args
+        ;;
     "run")
         run_docker_composer_cmd "up" $args
         ;;
