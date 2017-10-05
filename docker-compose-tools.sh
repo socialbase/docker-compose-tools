@@ -43,6 +43,9 @@ case "$1" in
     "pull")
         run_docker_composer_cmd "pull" $args
         ;;
+    "stop")
+        run_docker_composer_cmd "stop" $args
+        ;;
     "help")
         help
         ;;

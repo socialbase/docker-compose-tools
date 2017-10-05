@@ -67,6 +67,7 @@ gen_initial_files() {
     fi
 
     echo "SRC_DIR=${src_dir}" > $dc_dir/.env
+    echo "DC_DIR=${src_dir}" >> $dc_dir/.env
 
     for i in $(list_services); do
         tmp_dir=${src_dir}$(get_param $i "dir")
